@@ -1,14 +1,14 @@
 const router = require("express").Router();
-const controller = require("../controllers/news.controller");
+const controller = require("../controllers/blog.controller");
 
-router.get("/", controller.getTopNews);
+router.get("/", controller.getTopBlogs);
 
-router.get("/:id", controller.getNewsById);
+router.get("/:id", controller.getBlogById);
 
-router.get("/similar/:id", controller.getSimilarNews);
+router.get("/similar/:id", controller.getSimilarBlogs);
 
-router.get("/categories/:id", controller.getNewsByCategoryId);
+router.get("/categories/:id", controller.getBlogByCategoryId);
 
-router.get("/search/:term", controller.getNewsBySearchTerm);
+router.get("/search/:term", controller.getBlogBySearchTerm);
 
 module.exports = router;

@@ -1,12 +1,12 @@
 const { Op } = require("sequelize");
-const { News, Topic, Occupation, NewsTopic } = require("./../models/");
+const { Blog, Topic, BlogTopic } = require("../models");
 
-exports.getTopNews = async (req, res) => {
+exports.getTopBlogs = async (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1; // default page is 1
   const limit = req.query.limit ? parseInt(req.query.limit) : 9;
   const offset = (page - 1) * limit;
   try {
-    const data = await News.findAll({
+    const data = await Blog.findAll({
       limit: limit,
       offset: offset,
       include: [
@@ -14,20 +14,16 @@ exports.getTopNews = async (req, res) => {
           model: Topic,
           as: "topics",
           through: {
-            model: NewsTopic,
+            model: BlogTopic,
             attributes: ["order"],
           },
-          order: [[{ model: NewsTopic, as: "news_topics" }, "order", "ASC"]],
-        },
-        {
-          model: Occupation,
-          as: "occupations",
+          order: [[{ model: BlogTopic, as: "blog_topics" }, "order", "ASC"]],
         },
       ],
       order: [["id", "DESC"]],
     });
 
-    const count = await News.count();
+    const count = await Blog.count();
     const totalPages = Math.ceil(count / limit);
     const nextPage = page < totalPages ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
@@ -47,27 +43,23 @@ exports.getTopNews = async (req, res) => {
   }
 };
 
-exports.getNewsById = async (req, res) => {
+exports.getBlogById = async (req, res) => {
   const { id } = req.params;
   try {
-    const data = await News.findByPk(id, {
+    const data = await Blog.findByPk(id, {
       include: [
         {
           model: Topic,
           as: "topics",
           through: {
-            model: NewsTopic,
+            model: BlogTopic,
             attributes: ["order"],
           },
-          order: [[{ model: NewsTopic, as: "news_topics" }, "order", "ASC"]],
-        },
-        {
-          model: Occupation,
-          as: "occupations",
+          order: [[{ model: BlogTopic, as: "blog_topics" }, "order", "ASC"]],
         },
       ],
     });
-    if (!data) return res.status(404).send({ err: "News not found" });
+    if (!data) return res.status(404).send({ err: "Blog not found" });
     await data.update({
       views: data.views + 1,
     });
@@ -78,19 +70,19 @@ exports.getNewsById = async (req, res) => {
   }
 };
 
-exports.getSimilarNews = async (req, res) => {
+exports.getSimilarBlogs = async (req, res) => {
   const { id } = req.params;
   try {
-    const newsExists = await News.findByPk(id, {
+    const blogExists = await Blog.findByPk(id, {
       include: [{ model: Topic }],
     });
-    if (!newsExists) return res.status(404).send({ err: "News not found" });
+    if (!blogExists) return res.status(404).send({ err: "Blog not found" });
 
-    const categoryExists = await Topic.findByPk(newsExists.topics[0].id);
+    const categoryExists = await Topic.findByPk(blogExists.topics[0].id);
     if (!categoryExists)
       return res.status(404).send({ err: "Category not found" });
 
-    const data = await News.findAll({
+    const data = await Blog.findAll({
       include: [
         {
           model: Topic,
@@ -99,13 +91,10 @@ exports.getSimilarNews = async (req, res) => {
             id: categoryExists.id,
           },
           through: {
-            model: NewsTopic,
+            model: BlogTopic,
             attributes: ["order"],
           },
-          order: [[{ model: NewsTopic, as: "news_topics" }, "order", "ASC"]],
-        },
-        {
-          model: Occupation,
+          order: [[{ model: BlogTopic, as: "blog_topics" }, "order", "ASC"]],
         },
       ],
       where: {
@@ -123,7 +112,7 @@ exports.getSimilarNews = async (req, res) => {
   }
 };
 
-exports.getNewsByCategoryId = async (req, res) => {
+exports.getBlogByCategoryId = async (req, res) => {
   const { id } = req.params;
   const page = req.query.page ? parseInt(req.query.page) : 1; // default page is 1
   const limit = req.query.limit ? parseInt(req.query.limit) : 9;
@@ -132,7 +121,7 @@ exports.getNewsByCategoryId = async (req, res) => {
     const categoryExists = await Topic.findByPk(id);
     if (!categoryExists)
       return res.status(404).send({ err: "Category not found" });
-    const data = await News.findAll({
+    const data = await Blog.findAll({
       where: {
         id: {
           [Op.ne]: id,
@@ -148,20 +137,16 @@ exports.getNewsByCategoryId = async (req, res) => {
             id: categoryExists.id,
           },
           through: {
-            model: NewsTopic,
+            model: BlogTopic,
             attributes: ["order"],
           },
-          order: [[{ model: NewsTopic, as: "news_topics" }, "order", "ASC"]],
-        },
-        {
-          model: Occupation,
-          as: "occupations",
+          order: [[{ model: BlogTopic, as: "blog_topics" }, "order", "ASC"]],
         },
       ],
       order: [["id", "DESC"]],
     });
 
-    const count = await News.count({
+    const count = await Blog.count({
       where: {
         id: {
           [Op.ne]: id,
@@ -197,10 +182,10 @@ exports.getNewsByCategoryId = async (req, res) => {
   }
 };
 
-exports.getNewsBySearchTerm = async (req, res) => {
+exports.getBlogBySearchTerm = async (req, res) => {
   const { term } = req.params;
   try {
-    const data = await News.findAll({
+    const data = await Blog.findAll({
       where: {
         [Op.or]: [{ title: { [Op.like]: "%" + term + "%" } }],
       },
@@ -209,14 +194,10 @@ exports.getNewsBySearchTerm = async (req, res) => {
           model: Topic,
           as: "topics",
           through: {
-            model: NewsTopic,
+            model: BlogTopic,
             attributes: ["order"],
           },
-          order: [[{ model: NewsTopic, as: "news_topics" }, "order", "ASC"]],
-        },
-        {
-          model: Occupation,
-          as: "occupations",
+          order: [[{ model: BlogTopic, as: "blog_topics" }, "order", "ASC"]],
         },
       ],
       order: [["id", "DESC"]],
