@@ -1,4 +1,4 @@
-const { User, Topic, Occupation } = require("./../../models/");
+const { User, Topic, Occupation } = require("../../models");
 const bcrypt = require("bcrypt");
 const { sendEmail } = require("../../utils/nodemailer");
 

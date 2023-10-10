@@ -11,7 +11,7 @@ module.exports = (passport) => {
   passport.use(
     new JwtStrategy(options, (jwt_payload, done) => {
       User.findByPk(jwt_payload.id).then((user) => {
-        if (user) {
+        if (user && user.isActive) {
           return done(null, user);
         }
         return done(null, false);
