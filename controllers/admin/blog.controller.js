@@ -9,7 +9,7 @@ exports.getAllBlogs = async (req, res) => {
   const search = req.query.search || "";
 
   try {
-    const data = await News.findAll({
+    const data = await Blog.findAll({
       where: {
         [Op.or]: [{ title: { [Op.like]: "%" + search + "%" } }],
       },
@@ -22,7 +22,7 @@ exports.getAllBlogs = async (req, res) => {
             model: BlogTopic,
             attributes: ["order"],
           },
-          order: [[{ model: NewsTopic, as: "blog_topics" }, "order", "ASC"]],
+          order: [[{ model: BlogTopic, as: "blog_topics" }, "order", "ASC"]],
         },
       ],
       order: [["id", "DESC"]],
@@ -79,7 +79,7 @@ exports.getBlogById = async (req, res) => {
           model: Topic,
           as: "topics",
           through: {
-            model: NewsTopic,
+            model: BlogTopic,
             attributes: ["order"],
             order: [["order", "ASC"]],
           },
@@ -119,7 +119,7 @@ exports.postBlog = async (req, res) => {
 
     const topicsArr = Array.isArray(topic) ? topic : [topic];
     const topicOrders = topicsArr.map((t, i) => ({
-      topicId: t,
+      topicId: t.value,
       blogId: blogData.id,
       order: i,
     }));
@@ -170,10 +170,12 @@ exports.updateBlog = async (req, res) => {
     blogData.blog = blog;
     blogData.isFeatured = isFeatured;
 
+    await blogData.setTopics([]);
+
     const topicsArr = Array.isArray(topic) ? topic : [topic];
     const topicOrders = topicsArr.map((t, i) => ({
-      topicId: t,
-      newsId: blogData.id,
+      topicId: t.value,
+      blogId: blogData.id,
       order: i,
     }));
 
