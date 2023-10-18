@@ -70,6 +70,41 @@ exports.getBlogById = async (req, res) => {
   }
 };
 
+exports.getBlogBySlug = async (req, res) => {
+  const { slug } = req.params;
+  console.log(slug);
+  try {
+    const data = await Blog.findOne(
+      {
+        where: {
+          slug,
+        },
+      },
+      {
+        include: [
+          {
+            model: Topic,
+            as: "topics",
+            through: {
+              model: BlogTopic,
+              attributes: ["order"],
+            },
+            order: [[{ model: BlogTopic, as: "blog_topics" }, "order", "ASC"]],
+          },
+        ],
+      }
+    );
+    if (!data) return res.status(404).send({ err: "Blog not found" });
+    await data.update({
+      views: data.views + 1,
+    });
+    return res.status(200).json({ data });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({ err });
+  }
+};
+
 exports.getSimilarBlogs = async (req, res) => {
   const { id } = req.params;
   try {
