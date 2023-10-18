@@ -9,6 +9,12 @@ const Blog = sequelize.define(
       allowNull: false,
       trim: true,
     },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      trim: true,
+      unique: true,
+    },
     previewText: {
       type: DataTypes.STRING,
       allowNull: false,

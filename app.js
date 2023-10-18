@@ -21,6 +21,7 @@ app.use("/api/v1/blogs", require("./routes/blog.route"));
 // app.use("/api/v1/users", require("./routes/user/profile.route"));
 
 // admin routes
+app.use("/api/v1/admin/profile", require("./routes/admin/profile.route"));
 app.use("/api/v1/admin/topics", require("./routes/admin/topics.route"));
 app.use("/api/v1/admin/blogs", require("./routes/admin/blog.route"));
 app.use("/api/v1/admin/users", require("./routes/admin/user.route"));

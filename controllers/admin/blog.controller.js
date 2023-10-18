@@ -1,6 +1,7 @@
 const { Blog, Topic, BlogTopic } = require("../../models");
 const { handleText } = require("../../helper/text");
 const { Op } = require("sequelize");
+const slugify = require("slugify");
 
 exports.getAllBlogs = async (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1; // default page is 1
@@ -95,7 +96,7 @@ exports.getBlogById = async (req, res) => {
 };
 
 exports.postBlog = async (req, res) => {
-  let { title, previewText, blog, topic, isFeatured } = req.body;
+  let { title, slug, previewText, blog, topic, isFeatured } = req.body;
 
   if (!title || title.trim().length <= 0)
     return res.status(400).send({ err: "Title cannot be empty" });
@@ -108,10 +109,12 @@ exports.postBlog = async (req, res) => {
 
   title = handleText(title);
   previewText = handleText(previewText);
+  slug = slugify(title);
 
   try {
     let blogData = await Blog.create({
       title,
+      slug,
       previewText,
       blog,
       isFeatured,
@@ -157,7 +160,7 @@ exports.updateBlog = async (req, res) => {
 
   title = handleText(title);
   previewText = handleText(previewText);
-
+  slug = slugify(title);
   try {
     let blogData = await Blog.findByPk(id);
 
@@ -169,6 +172,7 @@ exports.updateBlog = async (req, res) => {
     blogData.previewText = previewText;
     blogData.blog = blog;
     blogData.isFeatured = isFeatured;
+    blog.slug = slug;
 
     await blogData.setTopics([]);
 
